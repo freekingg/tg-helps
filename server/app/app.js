@@ -10,7 +10,7 @@ import WebSocket from './extension/socket/socket';
 import PuppeteerTelegram from './lib/tg/index'
 
 
-PuppeteerTelegram.signin()
+// PuppeteerTelegram.signin()
 
 /**
  * 首页

@@ -8,8 +8,6 @@ const signin = async (page, url) => {
   );
   await page.screenshot({ path: "screenshot_1.png", fullPage: true });
 
- 
-
   // 等待扫码登录中
   await page.waitForSelector("#page-chats", { visible: true, timeout: 0 });
   console.log("登录了");

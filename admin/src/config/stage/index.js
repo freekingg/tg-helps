@@ -1,7 +1,8 @@
 import Utils from '@/lin/util/util'
 import adminConfig from './admin'
-import bookConfig from './book' // 引入图书管理路由文件
-import demoConfig from './demo' // 引入图书管理路由文件
+import bookConfig from './book'
+import demoConfig from './demo'
+import accountConfig from './account'
 import pluginsConfig from './plugin'
 
 // eslint-disable-next-line import/no-mutable-exports
@@ -45,6 +46,7 @@ let homeRouter = [
     inNav: false,
     icon: 'iconfont icon-rizhiguanli',
   },
+  accountConfig,
   demoConfig,
   bookConfig,
   adminConfig,
