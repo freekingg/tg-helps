@@ -7,6 +7,11 @@ import { config, json, logging, success, jwt, Loader } from 'lin-mizar';
 import { PermissionModel } from './model/permission';
 import WebSocket from './extension/socket/socket';
 
+import PuppeteerTelegram from './lib/tg/index'
+
+
+PuppeteerTelegram.signin()
+
 /**
  * 首页
  */

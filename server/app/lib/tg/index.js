@@ -3,8 +3,14 @@ import { Cluster } from "puppeteer-cluster";
 import Stealth from "puppeteer-extra-plugin-stealth";
 import vanillaPuppeteer from "puppeteer";
 
+import signin from './signin'
+
 const puppeteer = addExtra(vanillaPuppeteer);
 puppeteer.use(Stealth());
+
+const launchOptions = {
+  headless: false
+};
 
 class PuppeteerTelegram {
   constructor(opts = {}) {
@@ -37,10 +43,12 @@ class PuppeteerTelegram {
    */
   async browser() {
     if (!this._browser) {
+
       const cluster = await Cluster.launch({
         puppeteer,
-        maxConcurrency: 2,
-        concurrency: Cluster.CONCURRENCY_CONTEXT,
+        maxConcurrency: 1,
+        concurrency: Cluster.CONCURRENCY_PAGE,
+        puppeteerOptions: launchOptions
       });
 
       this._browser = cluster;
@@ -55,19 +63,11 @@ class PuppeteerTelegram {
    * @param {object} user - User details for new account
    * @return {Promise}
    */
-  async signup(user, opts = {}) {
-    const browser = await this.browser();
-    await signup(browser, user, opts);
-  }
-
-  /**
-   * Signs into an existing Instagram account.
-   * @param {Object} user - User details for new account
-   * @return {Promise}
-   */
-  async signin(user, opts = {}) {
-    const browser = await this.browser();
-    await signin(browser, user, opts);
+  async signin() {
+    const browser = await vanillaPuppeteer.launch(launchOptions)
+    const page = await browser.newPage()
+    
+    await signin(page, 'https://web.telegram.org/k/');
   }
 
   /**
@@ -93,4 +93,4 @@ class PuppeteerTelegram {
     this._user = null;
   }
 }
-export default PuppeteerTelegram;
+export default new PuppeteerTelegram();
