@@ -63,11 +63,14 @@ class PuppeteerTelegram {
    * @param {object} user - User details for new account
    * @return {Promise}
    */
-  async signin() {
+  async signin(account) {
     const browser = await vanillaPuppeteer.launch(launchOptions)
     const page = await browser.newPage()
     
-    await signin(page, 'https://web.telegram.org/k/');
+    await signin(page, {
+      url: 'https://web.telegram.org/k/',
+      account
+    });
   }
 
   /**

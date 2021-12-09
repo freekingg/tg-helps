@@ -33,6 +33,14 @@ class Account {
       handleError: true,
     })
   }
+  async authLogin(data) {
+    return _axios({
+      method: 'get',
+      url: 'v1/account/auth/login',
+      data,
+      handleError: true,
+    })
+  }
 }
 
 export default new Account()

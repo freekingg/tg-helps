@@ -4,7 +4,12 @@
       <el-form-item prop="phone" label="电话号码">
         <el-input disabled v-model="dataForm.phone" placeholder="请输入手机号带 + " />
       </el-form-item>
-      <el-form-item prop="summary" label="二维码">
+      <el-form-item prop="loginType" label="登录">
+        <el-radio-group v-model="dataForm.loginType">
+          <el-radio :label="1">二维码</el-radio>
+          <el-radio :label="2" disabled>验证码</el-radio>
+        </el-radio-group>
+
         <p>请扫描以下二维码有登录</p>
         <el-image src="https://placekitten.cosm/300/300">
           <template #placeholder>
@@ -14,7 +19,7 @@
           </template>
           <template #error>
             <div class="image-slot">
-             <el-button type="primary" :loading="loadQr">重新加载</el-button>
+             <el-button type="primary" @click="authLoginHandle" :loading="loadQr">重新加载</el-button>
             </div>
           </template>
         </el-image>
@@ -49,7 +54,7 @@ export default {
       dataForm: {
         id: '',
         phone: '',
-        summary: '',
+        loginType: 1,
       },
       dataRule: {
         phone: [{ required: true, message: '请输入号码', trigger: 'blur' }],
@@ -66,12 +71,18 @@ export default {
         if (data.dataForm.id) {
           const info = await accountModel.getAccount(data.dataForm.id)
           data.dataForm = info
+          data.dataForm.loginType = 1
         }
       })
     }
     const resetForm = () => {
       dataFormRef.value.resetFields()
     }
+    const authLoginHandle = async () => {
+      const info = await accountModel.authLogin(data.dataForm)
+      console.log('info: ', info);
+    }
+
     // 表单提交
     const dataFormSubmitHandle = async () => {
       dataFormRef.value.validate(async valid => {
@@ -124,6 +135,7 @@ export default {
       init,
       resetForm,
       dataFormSubmitHandle,
+      authLoginHandle,
       visible,
     }
   },

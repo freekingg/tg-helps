@@ -6,6 +6,8 @@ import {
 } from '../../validator/account';
 import { PositiveIdValidator } from '../../validator/common';
 
+import PuppeteerTelegram from '../../lib/tg'
+
 import { getSafeParamId } from '../../lib/util';
 import { AccountDao } from '../../dao/account';
 
@@ -35,6 +37,13 @@ accountApi.get('/', async ctx => {
   //     message: '没有找到相关书籍'
   //   });
   // }
+  ctx.json(items);
+});
+
+accountApi.get('/auth/login', async ctx => {
+  const v = await new AccountSearchValidator().validate(ctx);
+  let account = v.get('query.phone')
+  const items = await PuppeteerTelegram.signin(account);
   ctx.json(items);
 });
 

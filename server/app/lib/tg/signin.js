@@ -1,4 +1,8 @@
-const signin = async (page, url) => {
+import path from "path";
+const signin = async (page, { url, account }) => {
+
+  let screenPath = path.join(__dirname, '../../assets/screenshot')
+ 
   await page.setViewport({ width: 1000, height: 937 });
   await page.goto(url);
   await page.waitFor(3000);
@@ -6,7 +10,10 @@ const signin = async (page, url) => {
     "#auth-pages > .scrollable > .tabs-container > .page-signQR > .container",
     { visible: true }
   );
-  await page.screenshot({ path: "screenshot_1.png", fullPage: true });
+
+  await page.waitFor(3000);
+  // 生成截图
+  await page.screenshot({ path: `${screenPath}/${account}.png`, fullPage: true });
 
   // 等待扫码登录中
   await page.waitForSelector("#page-chats", { visible: true, timeout: 0 });
