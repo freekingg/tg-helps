@@ -9,7 +9,12 @@ const puppeteer = addExtra(vanillaPuppeteer);
 puppeteer.use(Stealth());
 
 const launchOptions = {
-  headless: false
+  headless: false,
+  defaultViewport: {
+    width: 1920,
+    height: 1080
+  }
+
 };
 
 class PuppeteerTelegram {
@@ -66,11 +71,13 @@ class PuppeteerTelegram {
   async signin(account) {
     const browser = await vanillaPuppeteer.launch(launchOptions)
     const page = await browser.newPage()
-    
-    await signin(page, {
+    let authData = await signin(page, {
       url: 'https://web.telegram.org/k/',
       account
     });
+    console.log('signin - finshed');
+    browser.close()
+    return authData
   }
 
   /**

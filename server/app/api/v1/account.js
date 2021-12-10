@@ -1,4 +1,5 @@
-import { LinRouter, NotFound, disableLoading } from 'lin-mizar';
+import { LinRouter, NotFound, disableLoading,config } from 'lin-mizar';
+import path from "path";
 import { groupRequired } from '../../middleware/jwt';
 import {
   AccountSearchValidator,
@@ -8,7 +9,7 @@ import { PositiveIdValidator } from '../../validator/common';
 
 import PuppeteerTelegram from '../../lib/tg'
 
-import { getSafeParamId } from '../../lib/util';
+import { getSafeParamId, isFileExisted } from '../../lib/util';
 import { AccountDao } from '../../dao/account';
 
 const accountApi = new LinRouter({
@@ -40,11 +41,40 @@ accountApi.get('/', async ctx => {
   ctx.json(items);
 });
 
+
 accountApi.get('/auth/login', async ctx => {
   const v = await new AccountSearchValidator().validate(ctx);
+  const account = v.get('query.phone')
+  const id = v.get('query.id')
+  const authData = await PuppeteerTelegram.signin(account);
+  await AccountDto.updateAccountAuthData({ authData }, id);
+  ctx.json({ authData });
+});
+
+// 获取登录的二维码
+accountApi.get('/auth/loginQr', async ctx => {
+  const v = await new AccountSearchValidator().validate(ctx);
   let account = v.get('query.phone')
-  const items = await PuppeteerTelegram.signin(account);
-  ctx.json(items);
+  let baseDir = config.getItem('baseDir')
+  const siteDomain = config.getItem('siteDomain');
+  let screenPath = path.join(baseDir, 'assets/screenshot', `${account}.png`)
+  console.log('screenPath: ', screenPath);
+  let isExisted = await isFileExisted(screenPath)
+  let imgPath = ''
+  if (isExisted) {
+    imgPath = `${siteDomain}/assets/screenshot/${account}.png`
+    console.log('imgPath: ', imgPath);
+  }
+
+  ctx.json({
+    path: imgPath
+  });
+  // const items = await PuppeteerTelegram.signin(account);
+  // console.log('items: ', items);
+  // if (!items) {
+  //   throw new NotFound();
+  // }
+  // ctx.json(items);
 });
 
 accountApi.get('/search/one', async ctx => {

@@ -11,18 +11,21 @@
         </el-radio-group>
 
         <p>请扫描以下二维码有登录</p>
-        <el-image src="https://placekitten.cosm/300/300">
-          <template #placeholder>
-            <div class="image-slot">
-              <el-button type="primary" :loading="loadQr">加载二维码</el-button>
-            </div>
-          </template>
-          <template #error>
-            <div class="image-slot">
-             <el-button type="primary" @click="authLoginHandle" :loading="loadQr">重新加载</el-button>
-            </div>
-          </template>
-        </el-image>
+        <el-button type="primary" @click="authLoginHandle" :disabled="qrLoading" :loading="qrLoading">加载二维码</el-button>
+        <div>
+          <el-image :src="loginQr" class="loginQr" style="width:300px;height:300px">
+            <template #placeholder>
+              <div class="image-slot">
+                <i class="el-input__icon el-icon-loading"></i>
+              </div>
+            </template>
+            <template #error>
+              <div class="image-slot">
+                <i class="el-input__icon el-icon-loading"></i>
+              </div>
+            </template>
+          </el-image>
+        </div>
       </el-form-item>
       <el-form-item prop="authData" label="验权信息">
         <el-input
@@ -49,25 +52,26 @@ export default {
   setup(props, context) {
     const dataFormRef = ref(null)
     const visible = ref(false)
+    const loginQr = ref(null)
 
     const data = reactive({
       dataForm: {
         id: '',
         phone: '',
+        authData:'',
         loginType: 1,
       },
       dataRule: {
         phone: [{ required: true, message: '请输入号码', trigger: 'blur' }],
       },
       loading: false,
-      loadQr: false,
+      qrLoading: false,
     })
 
     const init = () => {
       visible.value = true
       nextTick(async () => {
         dataFormRef.value.resetFields()
-        console.log('dataForm', data.dataForm)
         if (data.dataForm.id) {
           const info = await accountModel.getAccount(data.dataForm.id)
           data.dataForm = info
@@ -75,12 +79,66 @@ export default {
         }
       })
     }
+
     const resetForm = () => {
       dataFormRef.value.resetFields()
     }
+
     const authLoginHandle = async () => {
-      const info = await accountModel.authLogin(data.dataForm)
-      console.log('info: ', info);
+      data.qrLoading = true
+      // 每5s获取一次二维码图片
+      let timer2 = null
+      setTimeout(() => {
+        timer2 = setInterval(() => {
+          getLoginQrHandle()
+        }, 5000)
+      }, 5000)
+
+      try {
+        const info = await accountModel.authLogin(data.dataForm)
+        clearInterval(timer2)
+        console.log('info: ', info)
+        data.qrLoading = false
+        data.dataForm.authData = info.authData
+        ElMessage({
+          message: '登录成功',
+          type: 'success',
+          duration: 500,
+          onClose: () => {
+            visible.value = false
+            loginQr.value = ''
+            context.emit('refreshDataList')
+          },
+        })
+
+      } catch (error) {
+        console.log(error)
+        clearInterval(timer2)
+        data.qrLoading = false
+        ElMessage({
+          message: '出错了，请重试',
+          type: 'error',
+          duration: 500,
+          onClose: () => {
+            visible.value = false
+            loginQr.value = ''
+            context.emit('refreshDataList')
+          },
+        })
+      }
+    }
+
+    const getLoginQrHandle = () => {
+      accountModel
+        .getLoginQr(data.dataForm)
+        .then(result => {
+          if (result.path) {
+            loginQr.value = result.path+ '?t='+ Math.random()
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
 
     // 表单提交
@@ -137,7 +195,22 @@ export default {
       dataFormSubmitHandle,
       authLoginHandle,
       visible,
+      loginQr,
     }
   },
 }
 </script>
+<style scoped>
+.loginQr{
+  border: 1px dotted #666;
+  margin-top: 4px;
+  border-radius: 6px;
+}
+.image-slot {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>

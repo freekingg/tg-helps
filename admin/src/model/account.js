@@ -41,6 +41,14 @@ class Account {
       handleError: true,
     })
   }
+  async getLoginQr(data) {
+    return _axios({
+      method: 'get',
+      url: 'v1/account/auth/loginQr',
+      data,
+      handleError: true,
+    })
+  }
 }
 
 export default new Account()

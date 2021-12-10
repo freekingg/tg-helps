@@ -21,8 +21,13 @@
       <el-table size="mini" v-loading="dataListLoading" :data="dataList" border>
         <el-table-column prop="phone" label="号码"  />
         <el-table-column prop="summary" label="备注" />
-        <el-table-column prop="status" label="状态"/>
-        <el-table-column prop="update_time" label="创建时间"/>
+        <el-table-column label="状态">
+          <template #default="scope">
+            <el-tag size="medium" v-if="scope.row.authData">已登录</el-tag>
+            <el-tag size="medium"  type="info" v-else>未登录</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="create_time" label="创建时间"/>
         <el-table-column label="操作" fixed="right" header-align="center" align="center" width="200">
           <template #default="scope">
             <el-button type="success" size="mini" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>

@@ -1,5 +1,5 @@
 import { NotFound, Forbidden } from 'lin-mizar';
-import Sequelize from 'sequelize';
+import Sequelize, { json } from 'sequelize';
 import { Account } from '../model/account';
 
 class AccountDao {
@@ -54,10 +54,23 @@ class AccountDao {
         code: 10022
       });
     }
-    item.title = v.get('body.title');
-    item.author = v.get('body.author');
+    item.phone = v.get('body.phone');
+    item.authData = v.get('body.authData');
     item.summary = v.get('body.summary');
-    item.image = v.get('body.image');
+    item.extra = v.get('body.extra');
+    await item.save();
+  }
+
+  async updateAccountAuthData ({ authData }, id) {
+    console.log('id: ', id);
+    const item = await Account.findByPk(id);
+    console.log('item: ', item);
+    if (!item) {
+      throw new NotFound({
+        code: 10022
+      });
+    }
+    item.authData = JSON.stringify(authData);
     await item.save();
   }
 

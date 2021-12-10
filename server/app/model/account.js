@@ -11,7 +11,8 @@ class Account extends Model {
       authData: this.authData,
       status: this.status,
       summary: this.summary,
-      extra: this.extra
+      extra: this.extra,
+      create_time: this.create_time
     };
     return origin;
   }
@@ -29,7 +30,7 @@ Account.init(
       allowNull: true
     },
     authData: {
-      type: Sequelize.STRING(1000),
+      type: Sequelize.TEXT,
       allowNull: true
     },
     status: {

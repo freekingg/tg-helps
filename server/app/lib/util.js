@@ -1,17 +1,25 @@
-import { toSafeInteger, get, isInteger } from 'lodash';
-import { ParametersException } from 'lin-mizar';
+/*
+ * @Author: your name
+ * @Date: 2021-11-30 10:10:29
+ * @LastEditTime: 2021-12-10 11:35:41
+ * @LastEditors: your name
+ * @FilePath: \tg-helps\server\app\lib\util.js
+ */
+import { toSafeInteger, get, isInteger } from "lodash";
+import { ParametersException } from "lin-mizar";
+import fs from "fs";
 
-function getSafeParamId (ctx) {
-  const id = toSafeInteger(get(ctx.params, 'id'));
+function getSafeParamId(ctx) {
+  const id = toSafeInteger(get(ctx.params, "id"));
   if (!isInteger(id)) {
     throw new ParametersException({
-      code: 10030
+      code: 10030,
     });
   }
   return id;
 }
 
-function isOptional (val) {
+function isOptional(val) {
   // undefined , null , ""  , "    ", 皆通过
   if (val === undefined) {
     return true;
@@ -19,10 +27,23 @@ function isOptional (val) {
   if (val === null) {
     return true;
   }
-  if (typeof val === 'string') {
-    return val === '' || val.trim() === '';
+  if (typeof val === "string") {
+    return val === "" || val.trim() === "";
   }
   return false;
 }
 
-export { getSafeParamId, isOptional };
+// 根据路径判断文件是否存在
+function isFileExisted (filePath) {
+  return new Promise(function (resolve) {
+    fs.access(filePath, (err) => {
+      if (err) {
+        resolve(false)
+      } else {
+        resolve(true)
+      }
+    });
+  });
+}
+
+export { getSafeParamId, isOptional, isFileExisted };
