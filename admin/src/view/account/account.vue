@@ -28,10 +28,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="create_time" label="创建时间"/>
-        <el-table-column label="操作" fixed="right" header-align="center" align="center" width="200">
+        <el-table-column label="操作" fixed="right" header-align="center" align="center" width="260">
           <template #default="scope">
             <el-button type="success" size="mini" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
             <el-button type="danger" size="mini" @click="deleteHandle(scope.row.id, scope.row)">删除</el-button>
+            <el-button type="info" size="mini" @click="loginHandle(scope.row.id, scope.row)">配置</el-button>
             <el-button type="primary" size="mini" @click="loginHandle(scope.row.id, scope.row)">登录</el-button>
           </template>
         </el-table-column>

@@ -75,7 +75,6 @@ class PuppeteerTelegram {
       url: 'https://web.telegram.org/k/',
       account
     });
-    console.log('signin - finshed');
     browser.close()
     return authData
   }
