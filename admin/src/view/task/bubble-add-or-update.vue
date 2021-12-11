@@ -21,36 +21,41 @@
       </el-form-item> -->
       <el-form-item prop="time" label="发送内容">
         <div class="box">
-          <el-form :inline="true" :model="formInline">
-            <el-form-item>
+          <el-form :inline="true" :rules="contentDataRule" ref="contentDataFormRef" :model="contentDataForm">
+            <el-form-item prop="content">
               <el-input
                 size="medium"
                 type="textarea"
                 :autosize="{ minRows: 4, maxRows: 8 }"
                 placeholder="请输入发送内容"
-                v-model="dataForm.user"
+                v-model="contentDataForm.content"
               ></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="time">
               <el-date-picker
-                v-model="dataForm.time"
+                v-model="contentDataForm.time"
                 type="datetime"
                 placeholder="Select date and time"
               >
               </el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary">添加</el-button>
+              <el-button type="primary" @click="contentDataFormSubmitHandle">添加</el-button>
             </el-form-item>
           </el-form>
           <el-table :data="tableData" style="width: 100%">
-          <el-table-column prop="date" label="时间" width="180" />
-          <el-table-column prop="name" label="内容"/>
+          <el-table-column prop="time" label="时间" width="180" />
+          <el-table-column prop="content" label="内容"/>
+          <el-table-column label="帐号" width="80">
+          <template #default="scope">
+              <el-button size="mini" @click="delTableDataHandle(scope.$index)" type="danger">删除</el-button>
+            </template>
+          </el-table-column>
         </el-table>
         </div>
       </el-form-item>
       <el-form-item prop="accounts" label="发送帐号">
-        <el-select v-model="dataForm.accounts" @change="accountChangeHandle" multiple placeholder="Select">
+        <el-select v-model="dataForm.accounts" multiple placeholder="Select">
         <el-option
           v-for="item in accounts"
           :key="item.id"
@@ -69,16 +74,6 @@
           v-model="dataForm.summary"
         ></el-input>
       </el-form-item>
-      <el-form-item prop="authData" label="验权信息">
-        <el-input
-          size="medium"
-          type="textarea"
-          :autosize="{ minRows: 4, maxRows: 8 }"
-          placeholder="此处理不需要填写"
-          readonly
-          v-model="dataForm.authData"
-        ></el-input>
-      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
@@ -92,12 +87,15 @@ import { reactive, toRefs, nextTick, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import taskModel from '@/model/task'
 import accountModel from '@/model/account'
+import dayjs from 'dayjs'
 
 export default {
   emits: ['refreshDataList'],
 
   setup(props, context) {
     const dataFormRef = ref(null)
+    const contentDataFormRef = ref(null)
+
     const visible = ref(false)
 
     const data = reactive({
@@ -107,25 +105,22 @@ export default {
         type: 2,
         summary: '',
       },
-      formInline: {
-        user: '',
-        region: '',
+      contentDataForm: {
+        time: '',
+        content: '',
       },
       dataRule: {
         title: [{ required: true, message: '请输入名称', trigger: 'blur' }],
         contentData: [{ required: true, message: '请输入内容', trigger: 'blur' }],
-        accounts: [{ required: true, message: '请选择内容', trigger: 'blur' }],
+        accounts: [{ required: true, message: '请选择内容', trigger: 'change' }],
+      },
+      contentDataRule: {
+        content: [{ required: true, message: '请输入内容', trigger: 'blur' }],
         time: [{ required: true, message: '请输入间隔时间', trigger: 'blur' }],
       },
       loading: false,
       accounts:[],
-      tableData: [
-        {
-          date: '2016-05-03',
-          name: 'Tom',
-          address: 'No. 189, Grove St, Los Angeles',
-        }
-      ],
+      tableData: [],
     })
 
     const init = () => {
@@ -138,6 +133,7 @@ export default {
           const info = await taskModel.getTask(data.dataForm.id)
           data.dataForm = info
           data.dataForm.accounts = info.accounts.map(item=>item.id)
+          data.tableData = JSON.parse(info.contentData)
         }
       })
     }
@@ -157,6 +153,7 @@ export default {
           return data.accounts.find(it2=>it1 == it2.id)
         })
        data.dataForm.accounts = newAccounts
+       data.dataForm.contentData = JSON.stringify(data.tableData)
         if (!data.dataForm.id) {
           try {
             data.loading = true
@@ -195,19 +192,36 @@ export default {
       })
     }
 
-    const accountChangeHandle = (val) => {
-      console.log(val);
+    // 表单提交
+    const contentDataFormSubmitHandle = async () => {
+      contentDataFormRef.value.validate(async valid => {
+        if (!valid) {
+          // this.$message.error('请将信息填写完整')
+          return false
+        }
+        let contentDataForm = data.contentDataForm
+        contentDataForm.time = dayjs(contentDataForm.time).format('YYYY-MM-DD HH:mm:ss')
+        data.tableData.push(JSON.parse(JSON.stringify(contentDataForm)))
+        contentDataFormRef.value.resetFields()
+
+      })
+    }
+
+    const delTableDataHandle = (index) => {
+      data.tableData.splice(index,1)
     }
 
 
     return {
       ...toRefs(data),
       dataFormRef,
+      contentDataFormRef,
       init,
       resetForm,
       dataFormSubmitHandle,
+      contentDataFormSubmitHandle,
       visible,
-      accountChangeHandle
+      delTableDataHandle
     }
   },
 }

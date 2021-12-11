@@ -20,9 +20,9 @@
     <div class="wrap">
       <el-table size="mini" v-loading="dataListLoading" :data="dataList" border>
         <el-table-column prop="title" label="名称"  />
-        <el-table-column label="内容">
+        <el-table-column label="内容" width="120">
           <template #default="scope">
-            <div v-html="scope.row.contentData"></div>
+            详情中查看
           </template>
         </el-table-column>
          <el-table-column prop="time" label="间隔时间(秒)"  width="120"/>
