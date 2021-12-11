@@ -3,6 +3,7 @@ import adminConfig from './admin'
 import bookConfig from './book'
 import demoConfig from './demo'
 import accountConfig from './account'
+import taskConfig from './task'
 import pluginsConfig from './plugin'
 
 // eslint-disable-next-line import/no-mutable-exports
@@ -47,6 +48,7 @@ let homeRouter = [
     icon: 'iconfont icon-rizhiguanli',
   },
   accountConfig,
+  taskConfig,
   demoConfig,
   bookConfig,
   adminConfig,

@@ -19,42 +19,51 @@
 
     <div class="wrap">
       <el-table size="mini" v-loading="dataListLoading" :data="dataList" border>
-        <el-table-column prop="phone" label="号码"  />
-        <el-table-column prop="summary" label="备注" />
-        <el-table-column label="状态">
+        <el-table-column prop="title" label="名称"  />
+        <el-table-column label="内容">
           <template #default="scope">
-            <el-tag size="medium" v-if="scope.row.authData">已登录</el-tag>
-            <el-tag size="medium"  type="info" v-else>未登录</el-tag>
+            <div v-html="scope.row.contentData"></div>
           </template>
         </el-table-column>
-        <el-table-column prop="create_time" label="创建时间"/>
+         <el-table-column prop="time" label="间隔时间(秒)"  width="120"/>
+        <el-table-column label="帐号" width="300">
+          <template #default="scope">
+            <div class="account-box">
+              <el-tag size="medium" style="margin-right:2px;margin-bottom:2px"  type="info" v-for="(item,index) in scope.row.accounts" :key="index">{{item.phone}}</el-tag>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="scope">
+            <el-tag size="medium" v-if="scope.row.status == 2">进行中</el-tag>
+            <el-tag size="medium"  type="info" v-else>停止</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="create_time" label="创建时间" width="150"/>
         <el-table-column label="操作" fixed="right" header-align="center" align="center" width="260">
           <template #default="scope">
             <el-button type="success" size="mini" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
+            <el-button type="primary" size="mini" @click="loginHandle(scope.row.id, scope.row)">{{scope.row.status == 2 ?'停止':'开始'}}</el-button>
             <el-button type="danger" size="mini" @click="deleteHandle(scope.row.id, scope.row)">删除</el-button>
-            <el-button type="primary" size="mini" @click="loginHandle(scope.row.id, scope.row)">登录</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList(dataForm)" />
-    <login-add-or-update v-if="loginAddOrUpdateVisible" ref="loginAddOrUpdate" @refreshDataList="getDataList(dataForm)" />
   </div>
 </template>
 
 <script>
 import { reactive, toRefs, ref, nextTick } from 'vue'
 
-import accountModel from '@/model/account'
+import taskModel from '@/model/task'
 import mixinViewModule from '@/common/mixin/view-module'
-import AddOrUpdate from './account-add-or-update.vue'
-import LoginAddOrUpdate from './login-add-or-update.vue'
+import AddOrUpdate from './bubble-add-or-update.vue'
 
 export default {
   components: {
     AddOrUpdate,
-    LoginAddOrUpdate
   },
   setup() {
     const addOrUpdate = ref(null)
@@ -62,8 +71,8 @@ export default {
     const mixinModuleOptions = {
       getDataListIsPage: true,
       addOrUpdate,
-      getDataListModel: accountModel.getAccounts,
-      deleteDataModel: accountModel.deleteAccount,
+      getDataListModel: taskModel.getTasks,
+      deleteDataModel: taskModel.deleteTask,
     }
 
     const {
@@ -132,6 +141,13 @@ export default {
 
   .submit {
     float: left;
+  }
+
+  .account-box{
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 80px;
+    overflow: auto;
   }
 }
 </style>

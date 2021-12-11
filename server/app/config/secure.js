@@ -10,6 +10,10 @@ module.exports = {
     password: '123456',
     logging: false,
     timezone: '+08:00',
+    dialectOptions: {
+      dateStrings: true,
+      typeCast: true
+    },
     define: {
       charset: 'utf8mb4'
     }
