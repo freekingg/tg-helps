@@ -29,7 +29,8 @@ taskApi.get('/:id', async ctx => {
 });
 
 taskApi.get('/', async ctx => {
-  const items = await TaskDto.getTasks();
+  const v = await new TaskSearchValidator().validate(ctx);
+  const items = await TaskDto.getTasks(v);
   // if (!books || books.length < 1) {
   //   throw new NotFound({
   //     message: '没有找到相关书籍'

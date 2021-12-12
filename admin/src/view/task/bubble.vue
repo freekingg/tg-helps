@@ -2,11 +2,11 @@
   <div class="container">
     <el-row class="container-header" justify="space-between">
       <el-col :span="15">
-        <el-form :inline="true" :model="dataForm" @keyup.enter="getDataList()">
+        <!-- <el-form :inline="true" :model="dataForm" @keyup.enter="getDataList()">
           <el-form-item>
             <el-input v-model="dataForm.host" placeholder="请输入域名" clearable />
           </el-form-item>
-        </el-form>
+        </el-form> -->
       </el-col>
 
       <el-col :span="6" class="btn-group">
@@ -86,7 +86,9 @@ export default {
     } = mixinViewModule()
 
     const data = reactive({
-      dataForm: {},
+      dataForm: {
+        type:2
+      },
       loginAddOrUpdateVisible:false
     })
 

@@ -1,7 +1,7 @@
 import { NotFound, Forbidden } from 'lin-mizar';
 import Sequelize from 'sequelize';
+import { set } from 'lodash';
 import { Task } from '../model/task';
-
 class TaskDao {
   async getTask (id) {
     const item = await Task.findOne({
@@ -23,8 +23,14 @@ class TaskDao {
     return item;
   }
 
-  async getTasks () {
-    const items = await Task.findAll();
+  async getTasks (v) {
+    const condition = {};
+    v.get('query.type') && set(condition, 'type', v.get('query.type'));
+
+    const items = await Task.findAll({
+      where: Object.assign({}, condition),
+      order: [['create_time', 'DESC']]
+    });
     return items;
   }
 
