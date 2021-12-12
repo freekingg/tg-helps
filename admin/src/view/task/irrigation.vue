@@ -43,7 +43,7 @@
         <el-table-column label="操作" fixed="right" header-align="center" align="center" width="260">
           <template #default="scope">
             <el-button type="success" size="mini" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-            <el-button type="primary" size="mini" @click="loginHandle(scope.row.id, scope.row)">{{scope.row.status == 2 ?'停止':'开始'}}</el-button>
+            <el-button type="primary" size="mini" @click="startHandle(scope.row.id, scope.row)">{{scope.row.status == 2 ?'停止':'开始'}}</el-button>
             <el-button type="danger" size="mini" @click="deleteHandle(scope.row.id, scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -56,7 +56,7 @@
 
 <script>
 import { reactive, toRefs, ref, nextTick } from 'vue'
-
+import { ElLoading } from 'element-plus'
 import taskModel from '@/model/task'
 import mixinViewModule from '@/common/mixin/view-module'
 import AddOrUpdate from './irrigation-add-or-update.vue'
@@ -94,12 +94,14 @@ export default {
 
     initMixinViewModuleOptions(mixinModuleOptions, data.dataForm)
 
-    const loginHandle = (id) => {
-      data.loginAddOrUpdateVisible = true
-      nextTick(() => {
-        loginAddOrUpdate.value.dataForm.id = id
-        loginAddOrUpdate.value.init()
+    const startHandle = (id) => {
+      const loading = ElLoading.service({
+        lock: true,
+        text: '启动中...',
+        background: 'rgba(0, 0, 0, 0.7)',
       })
+
+      taskModel.starTirrigationTask({id})
 
     }
 
@@ -113,7 +115,7 @@ export default {
       dataListLoading,
       deleteHandle,
       dataList,
-      loginHandle
+      startHandle
     }
   },
 }

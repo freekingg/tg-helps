@@ -10,6 +10,14 @@ class Task {
     })
   }
 
+  async starTirrigationTask(data) {
+    return _axios({
+      method: 'post',
+      url: 'v1/task/start/irrigation',
+      data,
+    })
+  }
+
   async getTask(id) {
     const res = await get(`v1/task/${id}`)
     return res

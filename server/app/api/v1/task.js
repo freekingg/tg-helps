@@ -5,7 +5,7 @@ import {
   CreateOrUpdateTaskValidator
 } from '../../validator/task';
 import { PositiveIdValidator } from '../../validator/common';
-
+import PuppeteerTelegram from '../../lib/tg'
 import { getSafeParamId } from '../../lib/util';
 import { TaskDao } from '../../dao/task';
 
@@ -31,11 +31,6 @@ taskApi.get('/:id', async ctx => {
 taskApi.get('/', async ctx => {
   const v = await new TaskSearchValidator().validate(ctx);
   const items = await TaskDto.getTasks(v);
-  // if (!books || books.length < 1) {
-  //   throw new NotFound({
-  //     message: '没有找到相关书籍'
-  //   });
-  // }
   ctx.json(items);
 });
 
@@ -56,6 +51,18 @@ taskApi.post('/', async ctx => {
   });
 });
 
+taskApi.post('/start/irrigation', async ctx => {
+  const v = await new TaskSearchValidator().validate(ctx);
+  const id = v.get('body.id');
+  const item = await TaskDto.getTask(id);
+  let puppeteer = new PuppeteerTelegram()
+  let res = await puppeteer.irrigationTask(item)
+  console.log('res: ', res);
+  // ctx.success({
+  //   code: 12
+  // });
+});
+
 taskApi.put('/:id', async ctx => {
   const v = await new CreateOrUpdateTaskValidator().validate(ctx);
   const id = getSafeParamId(ctx);
@@ -68,7 +75,7 @@ taskApi.put('/:id', async ctx => {
 taskApi.linDelete(
   'deleteTask',
   '/:id',
-  taskApi.permission('删除帐号'),
+  taskApi.permission('删除任务'),
   groupRequired,
   async ctx => {
     const v = await new PositiveIdValidator().validate(ctx);

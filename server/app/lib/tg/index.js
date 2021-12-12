@@ -3,18 +3,20 @@ import { Cluster } from "puppeteer-cluster";
 import Stealth from "puppeteer-extra-plugin-stealth";
 import vanillaPuppeteer from "puppeteer";
 
-import signin from './signin'
+import signin from "./signin";
+import irrigation from "./task-irrigation";
 
 const puppeteer = addExtra(vanillaPuppeteer);
 puppeteer.use(Stealth());
+
+const telegramUrl = 'https://web.telegram.org/k/'
 
 const launchOptions = {
   headless: false,
   defaultViewport: {
     width: 1920,
-    height: 1080
-  }
-
+    height: 1080,
+  },
 };
 
 class PuppeteerTelegram {
@@ -24,36 +26,17 @@ class PuppeteerTelegram {
   }
 
   /**
-   * Whether or not this instance is authenticated with Instagram.
-   *
-   * @member {boolean}
-   */
-  get isAuthenticated() {
-    return !!this._user;
-  }
-
-  /**
-   * Authenticated user if authenticated with Instagram.
-   *
-   * @member {Object}
-   */
-  get user() {
-    return this._user;
-  }
-
-  /**
    * Puppeteer Browser instance to use.
    *
    * @return {Promise<Object>}
    */
   async browser() {
     if (!this._browser) {
-
       const cluster = await Cluster.launch({
         puppeteer,
-        maxConcurrency: 1,
-        concurrency: Cluster.CONCURRENCY_PAGE,
-        puppeteerOptions: launchOptions
+        maxConcurrency: 2,
+        concurrency: Cluster.CONCURRENCY_CONTEXT,
+        puppeteerOptions: launchOptions,
       });
 
       this._browser = cluster;
@@ -68,25 +51,30 @@ class PuppeteerTelegram {
    * @param {object} user - User details for new account
    * @return {Promise}
    */
-  async signin(account) {
-    const browser = await vanillaPuppeteer.launch(launchOptions)
-    const page = await browser.newPage()
+  static async signin(account) {
+    const browser = await vanillaPuppeteer.launch(launchOptions);
+    const page = await browser.newPage();
     let authData = await signin(page, {
-      url: 'https://web.telegram.org/k/',
-      account
+      url: telegramUrl,
+      account,
     });
-    browser.close()
-    return authData
+    browser.close();
+    return authData;
   }
 
   /**
-   * Signs out of the currently authenticated Instagram account
+   * 灌水任务
+   *
    * @return {Promise}
    */
-  async signout() {
+  async irrigationTask (task) {
     const browser = await this.browser();
-    await signout(browser, this._user);
-    this._user = null;
+    let { accounts } = task
+    for (const iterator of accounts) {
+      browser.queue({ ...iterator, url: telegramUrl }, irrigation);
+    }
+    // await browser.idle();
+    // await browser.close();
   }
 
   /**
@@ -96,10 +84,11 @@ class PuppeteerTelegram {
    */
   async close() {
     const browser = await this.browser();
+    await browser.idle();
     await browser.close();
 
     this._browser = null;
     this._user = null;
   }
 }
-export default new PuppeteerTelegram();
+export default PuppeteerTelegram;

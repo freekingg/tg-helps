@@ -128,7 +128,7 @@ export default {
       nextTick(async () => {
         dataFormRef.value.resetFields()
         let accounts = await accountModel.getAccounts()
-        data.accounts = accounts
+        data.accounts = accounts.filter(item=>item.authData)
         if (data.dataForm.id) {
           const info = await taskModel.getTask(data.dataForm.id)
           data.dataForm = info
